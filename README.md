@@ -1,4 +1,4 @@
-[DAA_Lucas](https://user-images.githubusercontent.com/12281235/64770339-f50bc000-d587-11e9-9bcc-3fccd2bfaa93.png)
+![DAA_Lucas](https://user-images.githubusercontent.com/12281235/64770339-f50bc000-d587-11e9-9bcc-3fccd2bfaa93.png)
 
 This repository contains the codes and notebooks used for the following paper:
 
