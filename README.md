@@ -16,7 +16,7 @@ This repository contains the codes and notebooks used for the following paper:
 * [Notebook for impulse response](https://github.com/okuchap/DAA_Lucas/blob/master/notebook/impulse_response.ipynb)
     - Section 4.4
 
-* [Notebook for Empirical Analysis](https://github.com/okuchap/DAA_Lucas/blob/master/notebook/empirical_analysis.ipynb)
+* [Notebook for empirical analysis](https://github.com/okuchap/DAA_Lucas/blob/master/notebook/empirical_analysis.ipynb)
     - Section 5
 
 * [Notebook for simulation](https://github.com/okuchap/DAA_Lucas/blob/master/notebook/simulation.ipynb)
