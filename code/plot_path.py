@@ -24,17 +24,17 @@ def coloring_BTC(block_times, y, init_adjust=2016-942, ylabel='', title=''):
             x_high = cum_blocktimes.max()/1440
         testx = [x_low, x_high, x_high, x_low]
         testy = [y_low, y_low, y_high, y_high]
-        if i%2 == 0:
-            plt.fill(testx,testy,color="y",alpha=0.3)
-        #else:
-            #plt.fill(testx,testy,color="blue",alpha=0.3)
+        if i % 2 == 0:
+            plt.fill(testx, testy, color="y", alpha=0.3)
+        # else:
+            # plt.fill(testx,testy,color="blue",alpha=0.3)
 
     plt.plot(cum_blocktimes/1440, y)
     plt.xticks(rotation=30)
     plt.xlabel('days')
-    if len(ylabel)>0:
+    if len(ylabel) > 0:
         plt.ylabel(ylabel)
-    if len(title)>0:
+    if len(title) > 0:
         plt.title(title)
     plt.show()
 
@@ -49,13 +49,13 @@ def plot_paths(sim_list=[],
     Plot the path of the variables that sim contains.
     default: sim_list = [sim_BTC, sim_BTC_bdd, sim_BCH, sim_BCH_bdd]
     '''
-    init_adjust=2016-942
+    init_adjust = 2016-942
     fig = plt.figure()
     for i in range(len(sim_list)):
         sim = sim_list[i]
-        x = sim.block_times.cumsum()/1440 # minute -> day
+        x = sim.block_times.cumsum()/1440  # minute -> day
 
-        ax1 = fig.add_subplot(4,4,1+i)
+        ax1 = fig.add_subplot(4, 4, 1+i)
         y = sim.winning_rates
         ax1.plot(x, y)
         #plt.setp(ax1.get_xticklabels(), rotation=30)
@@ -68,8 +68,8 @@ def plot_paths(sim_list=[],
         time_shifts = []
         num_shifts = (length+init_adjust)//2016
         for j in range(num_shifts):
-            time_shifts.append(cum_blocktimes\
-                [(j+1)*2016 - init_adjust - 1])
+            time_shifts.append(cum_blocktimes
+                               [(j+1)*2016 - init_adjust - 1])
         y_low = y.min()
         y_high = y.max()
 
@@ -82,13 +82,13 @@ def plot_paths(sim_list=[],
                 x_high = cum_blocktimes.max()/1440
             testx = [x_low, x_high, x_high, x_low]
             testy = [y_low, y_low, y_high, y_high]
-            if j%2 == 0:
-                ax1.fill(testx,testy,color="y",alpha=0.3)
-        if i==0:
+            if j % 2 == 0:
+                ax1.fill(testx, testy, color="y", alpha=0.3)
+        if i == 0:
             ax1.set_ylabel('Winning Rate $W(t)$\n(Pr(success)/Ehash)')
         ax1.set_title(title_list[i])
 
-        ax2 = fig.add_subplot(4,4,5+i)
+        ax2 = fig.add_subplot(4, 4, 5+i)
         y = sim.prices*sim.winning_rates*12.5
         ax2.plot(x, y)
         #plt.setp(ax3.get_xticklabels(), rotation=30)
@@ -100,8 +100,8 @@ def plot_paths(sim_list=[],
         time_shifts = []
         num_shifts = (length+init_adjust)//2016
         for j in range(num_shifts):
-            time_shifts.append(cum_blocktimes\
-                [(j+1)*2016 - init_adjust - 1])
+            time_shifts.append(cum_blocktimes
+                               [(j+1)*2016 - init_adjust - 1])
         y_low = y.min()
         y_high = y.max()
 
@@ -114,14 +114,14 @@ def plot_paths(sim_list=[],
                 x_high = cum_blocktimes.max()/1440
             testx = [x_low, x_high, x_high, x_low]
             testy = [y_low, y_low, y_high, y_high]
-            if j%2 == 0:
-                ax2.fill(testx,testy,color="y",alpha=0.3)
+            if j % 2 == 0:
+                ax2.fill(testx, testy, color="y", alpha=0.3)
 
-        if i==0:
+        if i == 0:
             ax2.set_ylabel('Reward $W(t)M(t)S(t)$\n(USD/Ehash)')
-        #plt.title(title_list[i])
+        # plt.title(title_list[i])
 
-        ax3 = fig.add_subplot(4,4,9+i)
+        ax3 = fig.add_subplot(4, 4, 9+i)
         y = sim.hash_rates
         ax3.plot(x, y)
         #plt.setp(ax4.get_xticklabels(), rotation=30)
@@ -133,8 +133,8 @@ def plot_paths(sim_list=[],
         time_shifts = []
         num_shifts = (length+init_adjust)//2016
         for j in range(num_shifts):
-            time_shifts.append(cum_blocktimes\
-                [(j+1)*2016 - init_adjust - 1])
+            time_shifts.append(cum_blocktimes
+                               [(j+1)*2016 - init_adjust - 1])
         y_low = y.min()
         y_high = y.max()
 
@@ -147,14 +147,14 @@ def plot_paths(sim_list=[],
                 x_high = cum_blocktimes.max()/1440
             testx = [x_low, x_high, x_high, x_low]
             testy = [y_low, y_low, y_high, y_high]
-            if j%2 == 0:
-                ax3.fill(testx,testy,color="y",alpha=0.3)
+            if j % 2 == 0:
+                ax3.fill(testx, testy, color="y", alpha=0.3)
 
-        if i==0:
+        if i == 0:
             ax3.set_ylabel('Hash Rate $H(t)$\n(Ehash/s)')
-        #plt.title(title_list[i])
+        # plt.title(title_list[i])
 
-        ax4 = fig.add_subplot(4,4,13+i)
+        ax4 = fig.add_subplot(4, 4, 13+i)
         y = sim.block_times
         ax4.plot(x, y)
         #plt.setp(ax2.get_xticklabels(), rotation=30)
@@ -166,8 +166,8 @@ def plot_paths(sim_list=[],
         time_shifts = []
         num_shifts = (length+init_adjust)//2016
         for j in range(num_shifts):
-            time_shifts.append(cum_blocktimes\
-                [(j+1)*2016 - init_adjust - 1])
+            time_shifts.append(cum_blocktimes
+                               [(j+1)*2016 - init_adjust - 1])
         y_low = y.min()
         y_high = y.max()
 
@@ -180,12 +180,12 @@ def plot_paths(sim_list=[],
                 x_high = cum_blocktimes.max()/1440
             testx = [x_low, x_high, x_high, x_low]
             testy = [y_low, y_low, y_high, y_high]
-            if j%2 == 0:
-                ax4.fill(testx,testy,color="y",alpha=0.3)
+            if j % 2 == 0:
+                ax4.fill(testx, testy, color="y", alpha=0.3)
 
-        if i==0:
+        if i == 0:
             ax4.set_ylabel('Block Time $B(t)$\n(min.)')
-        #plt.title(title_list[i])
+        # plt.title(title_list[i])
 
     plt.tight_layout()
     fig.align_labels()
@@ -215,18 +215,18 @@ def plot_paths_2(exprvs=pd.DataFrame(), sim_list=[],
             list containing titles used when graphs are plotted.
     '''
     # assuming the height of the first block to be created is 551443
-    init_adjust=2016-942
+    init_adjust = 2016-942
 
     fig = plt.figure()
     for i in range(len(sim_list)):
         sim = sim_list[i]
-        x = sim.block_times.cumsum()/1440 # minute -> day
+        x = sim.block_times.cumsum()/1440  # minute -> day
 
         # winning rate
-        ax1 = fig.add_subplot(4,2,1+i)
+        ax1 = fig.add_subplot(4, 2, 1+i)
         y = sim.winning_rates
         opt_w = compute_opt_w_array(sim.prices, W_init_low=W_init_low,
-            W_init_high=W_init_high, W_grid=W_grid, tol=tol)
+                                    W_init_high=W_init_high, W_grid=W_grid, tol=tol)
         ax1.plot(x, y, label='real')
         ax1.plot(x, opt_w, label='first-best')
         ax1.legend(loc='upper right')
@@ -245,8 +245,8 @@ def plot_paths_2(exprvs=pd.DataFrame(), sim_list=[],
         time_shifts = []
         num_shifts = (length+init_adjust)//2016
         for j in range(num_shifts):
-            time_shifts.append(cum_blocktimes\
-                [(j+1)*2016 - init_adjust - 1])
+            time_shifts.append(cum_blocktimes
+                               [(j+1)*2016 - init_adjust - 1])
 
         for j in range(len(time_shifts)):
             if j < len(time_shifts)-1:
@@ -257,14 +257,14 @@ def plot_paths_2(exprvs=pd.DataFrame(), sim_list=[],
                 x_high = cum_blocktimes.max()/1440
             testx = [x_low, x_high, x_high, x_low]
             testy = [y_low, y_low, y_high, y_high]
-            if j%2 == 0:
-                ax1.fill(testx,testy,color="y",alpha=0.3)
-        if i==0:
+            if j % 2 == 0:
+                ax1.fill(testx, testy, color="y", alpha=0.3)
+        if i == 0:
             ax1.set_ylabel('Winning Rate $W(t)$\n(Pr(success)/Ehash)')
         ax1.set_title(title_list[i])
 
         # reward
-        ax2 = fig.add_subplot(4,2,3+i)
+        ax2 = fig.add_subplot(4, 2, 3+i)
         opt_reward = opt_w*12.5*sim.prices
         y = sim.prices*sim.winning_rates*12.5
         ax2.plot(x, y, label='real')
@@ -284,8 +284,8 @@ def plot_paths_2(exprvs=pd.DataFrame(), sim_list=[],
         time_shifts = []
         num_shifts = (length+init_adjust)//2016
         for j in range(num_shifts):
-            time_shifts.append(cum_blocktimes\
-                [(j+1)*2016 - init_adjust - 1])
+            time_shifts.append(cum_blocktimes
+                               [(j+1)*2016 - init_adjust - 1])
 
         for j in range(len(time_shifts)):
             if j < len(time_shifts)-1:
@@ -296,15 +296,15 @@ def plot_paths_2(exprvs=pd.DataFrame(), sim_list=[],
                 x_high = cum_blocktimes.max()/1440
             testx = [x_low, x_high, x_high, x_low]
             testy = [y_low, y_low, y_high, y_high]
-            if j%2 == 0:
-                ax2.fill(testx,testy,color="y",alpha=0.3)
+            if j % 2 == 0:
+                ax2.fill(testx, testy, color="y", alpha=0.3)
 
-        if i==0:
+        if i == 0:
             ax2.set_ylabel('Reward $R(t)$\n(USD/Ehash)')
-        #plt.title(title_list[i])
+        # plt.title(title_list[i])
 
         # hash rate
-        ax3 = fig.add_subplot(4,2,5+i)
+        ax3 = fig.add_subplot(4, 2, 5+i)
         opt_hash = hash(opt_reward)
         y = sim.hash_rates
         ax3.plot(x, y, label='real')
@@ -324,8 +324,8 @@ def plot_paths_2(exprvs=pd.DataFrame(), sim_list=[],
         time_shifts = []
         num_shifts = (length+init_adjust)//2016
         for j in range(num_shifts):
-            time_shifts.append(cum_blocktimes\
-                [(j+1)*2016 - init_adjust - 1])
+            time_shifts.append(cum_blocktimes
+                               [(j+1)*2016 - init_adjust - 1])
 
         for j in range(len(time_shifts)):
             if j < len(time_shifts)-1:
@@ -336,17 +336,19 @@ def plot_paths_2(exprvs=pd.DataFrame(), sim_list=[],
                 x_high = cum_blocktimes.max()/1440
             testx = [x_low, x_high, x_high, x_low]
             testy = [y_low, y_low, y_high, y_high]
-            if j%2 == 0:
-                ax3.fill(testx,testy,color="y",alpha=0.3)
+            if j % 2 == 0:
+                ax3.fill(testx, testy, color="y", alpha=0.3)
 
-        if i==0:
+        if i == 0:
             ax3.set_ylabel('Hash Rate $H(t)$\n(Ehash/s)')
-        #plt.title(title_list[i])
+        # plt.title(title_list[i])
 
         # block time
-        ax4 = fig.add_subplot(4,2,7+i)
+        ax4 = fig.add_subplot(4, 2, 7+i)
         y = sim.block_times
-        opt_blocktime = 10*exprvs[:x.shape[0]]
+        opt_blocktime = 10 * exprvs[: x.shape[0]]
+        # The following two lines should be fixed: The graph should be bar graphs and I should have used ax4.bar
+        # As the horizontal line is very short, there is little problem...? (But it seems to me that the graphs in the paper are bar graphs.)
         ax4.plot(x, y, label='real', linewidth=1)
         ax4.plot(x, opt_blocktime, label='first-best', alpha=0.5,
                  linewidth=1)
@@ -365,8 +367,8 @@ def plot_paths_2(exprvs=pd.DataFrame(), sim_list=[],
         time_shifts = []
         num_shifts = (length+init_adjust)//2016
         for j in range(num_shifts):
-            time_shifts.append(cum_blocktimes\
-                [(j+1)*2016 - init_adjust - 1])
+            time_shifts.append(cum_blocktimes
+                               [(j+1)*2016 - init_adjust - 1])
 
         for j in range(len(time_shifts)):
             if j < len(time_shifts)-1:
@@ -377,12 +379,12 @@ def plot_paths_2(exprvs=pd.DataFrame(), sim_list=[],
                 x_high = cum_blocktimes.max()/1440
             testx = [x_low, x_high, x_high, x_low]
             testy = [y_low, y_low, y_high, y_high]
-            if j%2 == 0:
-                ax4.fill(testx,testy,color="y",alpha=0.3)
+            if j % 2 == 0:
+                ax4.fill(testx, testy, color="y", alpha=0.3)
 
-        if i==0:
+        if i == 0:
             ax4.set_ylabel('Block Time $B(t)$\n(min.)')
-        #plt.title(title_list[i])
+        # plt.title(title_list[i])
 
     plt.tight_layout()
     fig.align_labels()
