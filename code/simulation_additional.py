@@ -761,3 +761,88 @@ def generate_simulation_data_DAA0(num_iter=3, price_shock=0,
         .format(price_shock, num_iter)+'.csv')
 
     return None
+
+
+def generate_simulation_data_asert(num_iter=3, price_shock=0, T=None,
+                                   opt_w=pd.DataFrame(), prev_data=pd.DataFrame(),
+                                   dir_sim='/Volumes/Data/research/BDA/simulation/'):
+    '''
+    Notes
+    -----
+    num_iter is a number of observations.
+    The price data 'sim_prices_ps={}_5000obs.csv'.format(price_shock) should
+    be created in advance.
+    '''
+    df_exprvs = pd.read_csv(dir_sim+'sim_exprvs_5000obs.csv')
+    df_price = pd.read_csv(dir_sim+'sim_prices_ps={}_5000obs.csv'\
+                           .format(price_shock))
+    df_opt_w = pd.read_csv(dir_sim + 'opt_w.csv', index_col=0)
+
+    path = '../data/BTCdata_presim.csv'
+    prev_data = pd.read_csv(path)
+    prev_data['time'] = pd.to_datetime(prev_data['time'])
+    prev_data = prev_data.rename(columns={'blocktime': 'block_times', 'price': 'prices', 'probability of success /Eh': 'winning_rates'})
+
+    df_DAA_asert_blocktime = pd.DataFrame()
+    df_DAA_asert_hashrate = pd.DataFrame()
+    df_DAA_asert_winrate = pd.DataFrame()
+    df_DAA_asert_optwinrate = pd.DataFrame()
+    df_DAA_asert_expreward = pd.DataFrame()
+
+    sim = simulation(prev_data=prev_data)
+
+    for iter in range(num_iter):
+        prices = df_price.loc[:, 'iter_{}'.format(iter)]
+        exprvs = df_exprvs.loc[:, 'iter_{}'.format(iter)]
+
+        # DAA-1
+        _blocktime = pd.DataFrame()
+        _hashrate = pd.DataFrame()
+        _winrate = pd.DataFrame()
+        _optwinrate = pd.DataFrame()
+        _expreward = pd.DataFrame()
+
+        sim.sim_DAA_asert(prices=prices, exprvs=exprvs, df_opt_w=df_opt_w)
+        _blocktime['iter_{}'.format(iter)] = sim.block_times
+        _hashrate['iter_{}'.format(iter)] = sim.hash_rates
+        _winrate['iter_{}'.format(iter)] = sim.winning_rates
+        _optwinrate['iter_{}'.format(iter)] = sim.optimal_winning_rates
+        _expreward['iter_{}'.format(iter)] = sim.expected_rewards
+
+        df_DAA_asert_blocktime = pd.concat([df_DAA_asert_blocktime, _blocktime], axis=1)
+        df_DAA_asert_hashrate = pd.concat([df_DAA_asert_hashrate, _hashrate], axis=1)
+        df_DAA_asert_winrate = pd.concat([df_DAA_asert_winrate, _winrate], axis=1)
+        df_DAA_asert_optwinrate = pd.concat([df_DAA_asert_optwinrate, _optwinrate], axis=1)
+        df_DAA_asert_expreward = pd.concat([df_DAA_asert_expreward, _expreward], axis=1)
+
+
+    df_DAA_asert_blocktime.to_csv(dir_sim+'DAA_asert_blocktime_ps{}_{}obs_T={}'\
+        .format(price_shock, num_iter, T)+'.csv')
+    df_DAA_asert_hashrate.to_csv(dir_sim+'DAA_asert_hashrate_ps{}_{}obs_T={}'\
+        .format(price_shock, num_iter, T)+'.csv')
+    df_DAA_asert_winrate.to_csv(dir_sim+'DAA_asert_winrate_ps{}_{}obs_T={}'\
+        .format(price_shock, num_iter, T)+'.csv')
+    df_DAA_asert_optwinrate.to_csv(dir_sim+'DAA_asert_optwinrate_ps{}_{}obs_T={}'\
+        .format(price_shock, num_iter, T)+'.csv')
+    df_DAA_asert_expreward.to_csv(dir_sim+'DAA_asert_expreward_ps{}_{}obs_T={}'\
+        .format(price_shock, num_iter, T)+'.csv')
+
+    return None
+
+
+def MSE(df1=pd.DataFrame(), df2=pd.DataFrame()):
+    '''
+    The name of columns should be iter_0, iter_2, ..., iter_4999.
+    '''
+    array1 = df1.values
+    array2 = df2.values
+
+    array1[np.isnan(array1)] = 0
+    array2[np.isnan(array2)] = 0
+
+    temp = array1 - array2
+    temp = temp**2
+
+    temp = np.mean(temp, axis=0)
+    temp = np.mean(temp)
+    return temp
