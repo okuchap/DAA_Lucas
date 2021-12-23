@@ -265,6 +265,92 @@ class simulation:
         return None
 
 
+    def sim_DAA_asert(self, prices=pd.DataFrame(), exprvs=pd.DataFrame(),
+                      df_opt_w=pd.DataFrame(),
+                      presim_length=2016, ubd_param=3, half_life=2880):
+        '''
+        Conduct a simulation using DAA-2 as its DAA.
+        DAA-2 is based on the DAA used by BCH.
+
+        Parameters
+        ----------
+            prices: see sim_BTC.
+
+            exprvs: see sim_BTC.
+
+            presim_length: see sim_BTC.
+
+            ubd_param: see sim_BTC.
+
+        Returns
+        -------
+            None
+
+        Notes
+        -----
+            Difficulty, or winning_rate W(t), is adjusted every period.
+            At each adjustment, the last T_BCH blocks are taken into account.
+        '''
+        if prices.empty == True:
+            prices = self.generate_prices()
+        if exprvs.empty == True:
+            exprvs = self.generate_exprvs()
+
+        # initialization
+        ## period 0 to period (presim_length - 1): pre-simulation period
+        self._initialization(ubd_param)
+
+        # main loop
+        ## See what happens within self.length*self.b_target minutes
+        ## default: 12096*10 min = 12 weeks = 3 month
+        time_ubd = self.length * self.b_target
+        time = 0
+        period = presim_length-1
+
+        for t in range(presim_length-1, self.length*ubd_param+presim_length-1):
+            # S(t), W(t) is given
+
+            # R(t) = S(t) * M * W(t)
+            self.expected_rewards[t] =\
+                self.winning_rates[t] * self.block_reward * self.prices[t]
+
+
+            # W^*(t)
+            price_truncated = self.prices[t]
+            price_truncated = (price_truncated//50)*50 # grid size = 50
+            price_truncated = int(np.max([np.min([price_truncated, 11000]), 100])) # max 11000
+            self.optimal_winning_rates[t] =\
+                df_opt_w.loc[price_truncated, 'opt_w']
+
+            # hash rate H(t) <- W(t), S(t)
+            self.hash_rates[t] = self.hash_supply(t)
+
+            # block time B(t) <- H(t), W(t)
+            # multiply 60 to rescale time unit from second to minute
+            self.block_times[t] = \
+                exprvs[t]/ \
+                (self.hash_rates[t] * self.winning_rates[t] * 60)
+
+            time += self.block_times[t]
+            period += 1
+
+            if time < time_ubd:
+                # S(t+1)
+                self.compute_price(current_period=t, current_time=time,
+                                   prices=prices)
+
+                # W(t+1)
+                ## different from that of BTC in that
+                ## difficulty adjustment is conducted every period.
+                self.diff_adjust_asert(current_period=t, half_life=half_life)
+            else:
+                break
+
+        self._postprocessing(period)
+
+        return None
+
+
     def sim_DAA_0(self, prices=pd.DataFrame(), exprvs=pd.DataFrame(),
                   df_opt_w=pd.DataFrame(),
                   init_height=551443, presim_length=2016, ubd_param=3):
@@ -407,6 +493,20 @@ class simulation:
         # update W(t)
         self.winning_rates[current_period+1] = \
             block_term * winning_prob_term
+
+        return None
+
+
+    def diff_adjust_asert(self, current_period, half_life=2880):
+        '''
+        Used by sim_DAA_asert.
+        Modify self.winning_rates in place.
+        '''
+        temp = (self.block_times[current_period] - self.b_target)/half_life
+
+        # update W(t)
+        self.winning_rates[current_period+1] = \
+            self.winning_rates[current_period] * np.exp(temp)
 
         return None
 
