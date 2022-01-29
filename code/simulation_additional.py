@@ -795,7 +795,7 @@ def generate_simulation_data_asert(num_iter=3, price_shock=0, T=None,
         prices = df_price.loc[:, 'iter_{}'.format(iter)]
         exprvs = df_exprvs.loc[:, 'iter_{}'.format(iter)]
 
-        # DAA-1
+        # ASERT
         _blocktime = pd.DataFrame()
         _hashrate = pd.DataFrame()
         _winrate = pd.DataFrame()

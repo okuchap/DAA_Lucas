@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from hash import *
-from simulation_fixed_path import *
+from simulation_fixed_path import compute_opt_w_array
 
 
 def coloring_BTC(block_times, y, init_adjust=2016-942, ylabel='', title=''):
