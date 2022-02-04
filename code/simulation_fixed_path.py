@@ -923,6 +923,9 @@ def _contraction(W, S=3500, M=12.5, s=3, u=55, B=600, c=1.5):
 
 
 def stats_fixed_path(df):
+    '''
+    over X is the fraction of paths that experience at least one over X minutes blocktime
+    '''
     mean = df.mean().mean()
     std = df.std().mean()
     over60 = (((df>60).sum()/(df>60).sum()).fillna(0)).mean()
