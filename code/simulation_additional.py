@@ -188,13 +188,13 @@ class simulation:
 
         Parameters
         ----------
-            prices: see sim_BTC.
+            prices: see sim_DAA_1.
 
-            exprvs: see sim_BTC.
+            exprvs: see sim_DAA_1.
 
-            presim_length: see sim_BTC.
+            presim_length: see sim_DAA_1.
 
-            ubd_param: see sim_BTC.
+            ubd_param: see sim_DAA_1.
 
         Returns
         -------
@@ -274,13 +274,13 @@ class simulation:
 
         Parameters
         ----------
-            prices: see sim_BTC.
+            prices: see sim_DAA_1.
 
-            exprvs: see sim_BTC.
+            exprvs: see sim_DAA_1.
 
-            presim_length: see sim_BTC.
+            presim_length: see sim_DAA_1.
 
-            ubd_param: see sim_BTC.
+            ubd_param: see sim_DAA_1.
 
         Returns
         -------
@@ -612,12 +612,6 @@ def generate_simulation_data(num_iter=3, price_shock=0, T=None,
     df_DAA_2_winrate = pd.DataFrame()
     df_DAA_2_optwinrate = pd.DataFrame()
     df_DAA_2_expreward = pd.DataFrame()
-
-    df_DAA_0_blocktime = pd.DataFrame()
-    df_DAA_0_hashrate = pd.DataFrame()
-    df_DAA_0_winrate = pd.DataFrame()
-    df_DAA_0_optwinrate = pd.DataFrame()
-    df_DAA_0_expreward = pd.DataFrame()
 
     if T:
         T_BTC = T

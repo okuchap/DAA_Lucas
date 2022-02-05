@@ -534,7 +534,7 @@ class simulation:
         '''
         Compute the price at the time when the (t+1)-th block is created:
         compute S(t+1) using price data via linear interpolation.
-        prices contains the peice date recorded every 10 minutes.
+        prices contains the price date recorded every 10 minutes.
         '''
         time_left = int(current_time//self.b_target)
         time_right = time_left + 1
