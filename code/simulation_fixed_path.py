@@ -938,7 +938,7 @@ def stats_fixed_path(df):
 def make_stats(filelist, dir_sim):
     df_stats = pd.DataFrame()
     for simfile in filelist:
-        df = pd.read_csv(simfile)
+        df = pd.read_csv(simfile, index_col=0)
         mean, std, over60, over120, over180 = stats_fixed_path(df)
         df_stats.loc['mean', simfile[len(dir_sim):]] = mean
         df_stats.loc['std', simfile[len(dir_sim):]] = std
