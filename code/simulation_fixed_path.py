@@ -947,3 +947,29 @@ def make_stats(filelist, dir_sim):
         df_stats.loc['over180', simfile[len(dir_sim):]] = over180
 
     return df_stats
+
+
+def stats_tx_fixed_path(df):
+    '''
+    over X is the fraction of paths that experience at least one over X USD tx fee (total tx fee contained in one block)
+    '''
+    mean = df.mean().mean()
+    std = df.std().mean()
+    res_list = []
+    col_list = []
+    for thres in [3000+500*k for k in range(7)]:
+        res_list.append((((df>thres).sum()/(df>thres).sum()).fillna(0)).mean())
+        col_list.append('over{}'.format(thres))
+    return mean, std, res_list, col_list
+
+
+def stats_tx(filelist, dir_sim):
+    df_stats = pd.DataFrame()
+    for simfile in filelist:
+        df = pd.read_csv(simfile, index_col=0)
+        mean, std, res_list, col_list = stats_tx_fixed_path(df)
+        df_stats.loc['mean', simfile[len(dir_sim):]] = mean
+        df_stats.loc['std', simfile[len(dir_sim):]] = std
+        for res, col in zip(res_list, col_list):
+            df_stats.loc[col, simfile[len(dir_sim):]] = res
+    return df_stats

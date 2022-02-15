@@ -527,6 +527,7 @@ class simulation:
 
         log_tx_fee = -2.76 + 1.412*log_ave_blocktime + 0.651*np.log(self.prices[t]) + 0.104*log_price_diff
         tx_fee = np.exp(log_tx_fee)
+        self.tx_fees[t] = tx_fee
         current_exp_reward = \
             (self.prices[t] * self.block_reward + tx_fee) * self.winning_rates[current_period]
 
@@ -555,6 +556,7 @@ class simulation:
         self.hash_rates = np.zeros((sim_length_ubd,)) #H(t)
         self.optimal_winning_rates = np.zeros((sim_length_ubd,)) #W^*(t)
         self.expected_rewards = np.zeros((sim_length_ubd,)) #R(t)
+        self.tx_fees = np.zeros((sim_length_ubd,)) #T(t)
 
         # add pre-simulation periods
         self.prices = np.hstack([self.prev_prices, self.prices])
@@ -567,12 +569,13 @@ class simulation:
             self.winning_rates[presim_length-1]
 
         ## hash rates in pre-simulation periods will not be used
-        ## The same is true of opt_win_rate and exp_returns
+        ## The same is true of opt_win_rate, exp_returns, and tx fees
         _ = np.zeros(presim_length) + self.hash_supply(presim_length-1) # may be redundant
         self.hash_rates = np.hstack([_, self.hash_rates])
         _ = np.zeros(presim_length)
         self.optimal_winning_rates = np.hstack([_, self.optimal_winning_rates])
         self.expected_rewards = np.hstack([_, self.expected_rewards])
+        self.tx_fees = np.hstack([_, self.tx_fees])
 
         return None
 
@@ -585,6 +588,7 @@ class simulation:
         self.optimal_winning_rates =\
             self.optimal_winning_rates[presim_length:period]
         self.expected_rewards = self.expected_rewards[presim_length:period]
+        self.tx_fees = self.tx_fees[presim_length:period]
         return None
 
 
@@ -616,12 +620,14 @@ def generate_simulation_data(num_iter=3, price_shock=0, T=None,
     df_DAA_1_winrate = pd.DataFrame()
     df_DAA_1_optwinrate = pd.DataFrame()
     df_DAA_1_expreward = pd.DataFrame()
+    df_DAA_1_tx_fee = pd.DataFrame()
 
     df_DAA_2_blocktime = pd.DataFrame()
     df_DAA_2_hashrate = pd.DataFrame()
     df_DAA_2_winrate = pd.DataFrame()
     df_DAA_2_optwinrate = pd.DataFrame()
     df_DAA_2_expreward = pd.DataFrame()
+    df_DAA_2_tx_fee = pd.DataFrame()
 
     if T:
         T_BTC = T
@@ -642,6 +648,7 @@ def generate_simulation_data(num_iter=3, price_shock=0, T=None,
         _winrate = pd.DataFrame()
         _optwinrate = pd.DataFrame()
         _expreward = pd.DataFrame()
+        _tx_fee = pd.DataFrame()
 
         sim.sim_DAA_1(prices=prices, exprvs=exprvs, df_opt_w=df_opt_w)
         _blocktime['iter_{}'.format(iter)] = sim.block_times
@@ -649,12 +656,14 @@ def generate_simulation_data(num_iter=3, price_shock=0, T=None,
         _winrate['iter_{}'.format(iter)] = sim.winning_rates
         _optwinrate['iter_{}'.format(iter)] = sim.optimal_winning_rates
         _expreward['iter_{}'.format(iter)] = sim.expected_rewards
+        _tx_fee['iter_{}'.format(iter)] = sim.tx_fees
 
         df_DAA_1_blocktime = pd.concat([df_DAA_1_blocktime, _blocktime], axis=1)
         df_DAA_1_hashrate = pd.concat([df_DAA_1_hashrate, _hashrate], axis=1)
         df_DAA_1_winrate = pd.concat([df_DAA_1_winrate, _winrate], axis=1)
         df_DAA_1_optwinrate = pd.concat([df_DAA_1_optwinrate, _optwinrate], axis=1)
         df_DAA_1_expreward = pd.concat([df_DAA_1_expreward, _expreward], axis=1)
+        df_DAA_1_tx_fee = pd.concat([df_DAA_1_tx_fee, _tx_fee], axis=1)
 
         # DAA-2
         _blocktime = pd.DataFrame()
@@ -662,6 +671,7 @@ def generate_simulation_data(num_iter=3, price_shock=0, T=None,
         _winrate = pd.DataFrame()
         _optwinrate = pd.DataFrame()
         _expreward = pd.DataFrame()
+        _tx_fee = pd.DataFrame()
 
         sim.sim_DAA_2(prices=prices, exprvs=exprvs, df_opt_w=df_opt_w)
         _blocktime['iter_{}'.format(iter)] = sim.block_times
@@ -669,12 +679,14 @@ def generate_simulation_data(num_iter=3, price_shock=0, T=None,
         _winrate['iter_{}'.format(iter)] = sim.winning_rates
         _optwinrate['iter_{}'.format(iter)] = sim.optimal_winning_rates
         _expreward['iter_{}'.format(iter)] = sim.expected_rewards
+        _tx_fee['iter_{}'.format(iter)] = sim.tx_fees
 
         df_DAA_2_blocktime = pd.concat([df_DAA_2_blocktime, _blocktime], axis=1)
         df_DAA_2_hashrate = pd.concat([df_DAA_2_hashrate, _hashrate], axis=1)
         df_DAA_2_winrate = pd.concat([df_DAA_2_winrate, _winrate], axis=1)
         df_DAA_2_optwinrate = pd.concat([df_DAA_2_optwinrate, _optwinrate], axis=1)
         df_DAA_2_expreward = pd.concat([df_DAA_2_expreward, _expreward], axis=1)
+        df_DAA_2_tx_fee = pd.concat([df_DAA_2_tx_fee, _tx_fee], axis=1)
 
     df_DAA_1_blocktime.to_csv(dir_sim+'tx_DAA-1_blocktime_ps{}_{}obs_T={}'\
         .format(price_shock, num_iter, T)+'.csv')
@@ -685,6 +697,8 @@ def generate_simulation_data(num_iter=3, price_shock=0, T=None,
     df_DAA_1_optwinrate.to_csv(dir_sim+'tx_DAA-1_optwinrate_ps{}_{}obs_T={}'\
         .format(price_shock, num_iter, T)+'.csv')
     df_DAA_1_expreward.to_csv(dir_sim+'tx_DAA-1_expreward_ps{}_{}obs_T={}'\
+        .format(price_shock, num_iter, T)+'.csv')
+    df_DAA_1_tx_fee.to_csv(dir_sim+'tx_DAA-1_tx_fee_ps{}_{}obs_T={}'\
         .format(price_shock, num_iter, T)+'.csv')
 
     df_DAA_2_blocktime.to_csv(dir_sim+'tx_DAA-2_blocktime_ps{}_{}obs_T={}'\
@@ -697,74 +711,76 @@ def generate_simulation_data(num_iter=3, price_shock=0, T=None,
         .format(price_shock, num_iter, T)+'.csv')
     df_DAA_2_expreward.to_csv(dir_sim+'tx_DAA-2_expreward_ps{}_{}obs_T={}'\
         .format(price_shock, num_iter, T)+'.csv')
+    df_DAA_2_tx_fee.to_csv(dir_sim+'tx_DAA-2_tx_fee_ps{}_{}obs_T={}'\
+        .format(price_shock, num_iter, T)+'.csv')
 
     return None
 
 
-def generate_simulation_data_DAA0(num_iter=3, price_shock=0,
-                             opt_w=pd.DataFrame(), prev_data=pd.DataFrame(),
-                             dir_sim='/Volumes/Data/research/BDA/simulation/'):
-    '''
-    Notes
-    -----
-    num_iter is a number of observations.
-    The price data 'sim_prices_ps={}_5000obs.csv'.format(price_shock) should
-    be created in advance.
-    '''
-    df_exprvs = pd.read_csv(dir_sim+'sim_exprvs_5000obs.csv')
-    df_price = pd.read_csv(dir_sim+'sim_prices_ps={}_5000obs.csv'\
-                           .format(price_shock))
-    df_opt_w = pd.read_csv(dir_sim + 'opt_w.csv', index_col=0)
+# def generate_simulation_data_DAA0(num_iter=3, price_shock=0,
+#                              opt_w=pd.DataFrame(), prev_data=pd.DataFrame(),
+#                              dir_sim='/Volumes/Data/research/BDA/simulation/'):
+#     '''
+#     Notes
+#     -----
+#     num_iter is a number of observations.
+#     The price data 'sim_prices_ps={}_5000obs.csv'.format(price_shock) should
+#     be created in advance.
+#     '''
+#     df_exprvs = pd.read_csv(dir_sim+'sim_exprvs_5000obs.csv')
+#     df_price = pd.read_csv(dir_sim+'sim_prices_ps={}_5000obs.csv'\
+#                            .format(price_shock))
+#     df_opt_w = pd.read_csv(dir_sim + 'opt_w.csv', index_col=0)
 
-    path = '../data/BTCdata_presim.csv'
-    prev_data = pd.read_csv(path)
-    prev_data['time'] = pd.to_datetime(prev_data['time'])
-    prev_data = prev_data.rename(columns={'blocktime': 'block_times', 'price': 'prices', 'probability of success /Eh': 'winning_rates'})
+#     path = '../data/BTCdata_presim.csv'
+#     prev_data = pd.read_csv(path)
+#     prev_data['time'] = pd.to_datetime(prev_data['time'])
+#     prev_data = prev_data.rename(columns={'blocktime': 'block_times', 'price': 'prices', 'probability of success /Eh': 'winning_rates'})
 
-    df_DAA_0_blocktime = pd.DataFrame()
-    df_DAA_0_hashrate = pd.DataFrame()
-    df_DAA_0_winrate = pd.DataFrame()
-    df_DAA_0_optwinrate = pd.DataFrame()
-    df_DAA_0_expreward = pd.DataFrame()
+#     df_DAA_0_blocktime = pd.DataFrame()
+#     df_DAA_0_hashrate = pd.DataFrame()
+#     df_DAA_0_winrate = pd.DataFrame()
+#     df_DAA_0_optwinrate = pd.DataFrame()
+#     df_DAA_0_expreward = pd.DataFrame()
 
-    sim = simulation(prev_data=prev_data)
+#     sim = simulation(prev_data=prev_data)
 
-    for iter in range(num_iter):
-        prices = df_price.loc[:, 'iter_{}'.format(iter)]
-        exprvs = df_exprvs.loc[:, 'iter_{}'.format(iter)]
+#     for iter in range(num_iter):
+#         prices = df_price.loc[:, 'iter_{}'.format(iter)]
+#         exprvs = df_exprvs.loc[:, 'iter_{}'.format(iter)]
 
-        # DAA-0
-        _blocktime = pd.DataFrame()
-        _hashrate = pd.DataFrame()
-        _winrate = pd.DataFrame()
-        _optwinrate = pd.DataFrame()
-        _expreward = pd.DataFrame()
+#         # DAA-0
+#         _blocktime = pd.DataFrame()
+#         _hashrate = pd.DataFrame()
+#         _winrate = pd.DataFrame()
+#         _optwinrate = pd.DataFrame()
+#         _expreward = pd.DataFrame()
 
-        sim.sim_DAA_0(prices=prices, exprvs=exprvs, df_opt_w=df_opt_w)
-        _blocktime['iter_{}'.format(iter)] = sim.block_times
-        _hashrate['iter_{}'.format(iter)] = sim.hash_rates
-        _winrate['iter_{}'.format(iter)] = sim.winning_rates
-        _optwinrate['iter_{}'.format(iter)] = sim.optimal_winning_rates
-        _expreward['iter_{}'.format(iter)] = sim.expected_rewards
+#         sim.sim_DAA_0(prices=prices, exprvs=exprvs, df_opt_w=df_opt_w)
+#         _blocktime['iter_{}'.format(iter)] = sim.block_times
+#         _hashrate['iter_{}'.format(iter)] = sim.hash_rates
+#         _winrate['iter_{}'.format(iter)] = sim.winning_rates
+#         _optwinrate['iter_{}'.format(iter)] = sim.optimal_winning_rates
+#         _expreward['iter_{}'.format(iter)] = sim.expected_rewards
 
-        df_DAA_0_blocktime = pd.concat([df_DAA_0_blocktime, _blocktime], axis=1)
-        df_DAA_0_hashrate = pd.concat([df_DAA_0_hashrate, _hashrate], axis=1)
-        df_DAA_0_winrate = pd.concat([df_DAA_0_winrate, _winrate], axis=1)
-        df_DAA_0_optwinrate = pd.concat([df_DAA_0_optwinrate, _optwinrate], axis=1)
-        df_DAA_0_expreward = pd.concat([df_DAA_0_expreward, _expreward], axis=1)
+#         df_DAA_0_blocktime = pd.concat([df_DAA_0_blocktime, _blocktime], axis=1)
+#         df_DAA_0_hashrate = pd.concat([df_DAA_0_hashrate, _hashrate], axis=1)
+#         df_DAA_0_winrate = pd.concat([df_DAA_0_winrate, _winrate], axis=1)
+#         df_DAA_0_optwinrate = pd.concat([df_DAA_0_optwinrate, _optwinrate], axis=1)
+#         df_DAA_0_expreward = pd.concat([df_DAA_0_expreward, _expreward], axis=1)
 
-    df_DAA_0_blocktime.to_csv(dir_sim+'tx_DAA-0_blocktime_ps{}_{}obs'\
-        .format(price_shock, num_iter)+'.csv')
-    df_DAA_0_hashrate.to_csv(dir_sim+'tx_DAA-0_hashrate_ps{}_{}obs'\
-        .format(price_shock, num_iter)+'.csv')
-    df_DAA_0_winrate.to_csv(dir_sim+'tx_DAA-0_winrate_ps{}_{}obs'\
-        .format(price_shock, num_iter)+'.csv')
-    df_DAA_0_optwinrate.to_csv(dir_sim+'tx_DAA-0_optwinrate_ps{}_{}obs'\
-        .format(price_shock, num_iter)+'.csv')
-    df_DAA_0_expreward.to_csv(dir_sim+'tx_DAA-0_expreward_ps{}_{}obs'\
-        .format(price_shock, num_iter)+'.csv')
+#     df_DAA_0_blocktime.to_csv(dir_sim+'tx_DAA-0_blocktime_ps{}_{}obs'\
+#         .format(price_shock, num_iter)+'.csv')
+#     df_DAA_0_hashrate.to_csv(dir_sim+'tx_DAA-0_hashrate_ps{}_{}obs'\
+#         .format(price_shock, num_iter)+'.csv')
+#     df_DAA_0_winrate.to_csv(dir_sim+'tx_DAA-0_winrate_ps{}_{}obs'\
+#         .format(price_shock, num_iter)+'.csv')
+#     df_DAA_0_optwinrate.to_csv(dir_sim+'tx_DAA-0_optwinrate_ps{}_{}obs'\
+#         .format(price_shock, num_iter)+'.csv')
+#     df_DAA_0_expreward.to_csv(dir_sim+'tx_DAA-0_expreward_ps{}_{}obs'\
+#         .format(price_shock, num_iter)+'.csv')
 
-    return None
+#     return None
 
 
 def generate_simulation_data_asert(num_iter=3, price_shock=0, T=None,
@@ -792,6 +808,7 @@ def generate_simulation_data_asert(num_iter=3, price_shock=0, T=None,
     df_DAA_asert_winrate = pd.DataFrame()
     df_DAA_asert_optwinrate = pd.DataFrame()
     df_DAA_asert_expreward = pd.DataFrame()
+    df_DAA_asert_tx_fee = pd.DataFrame()
 
     sim = simulation(prev_data=prev_data)
 
@@ -805,6 +822,7 @@ def generate_simulation_data_asert(num_iter=3, price_shock=0, T=None,
         _winrate = pd.DataFrame()
         _optwinrate = pd.DataFrame()
         _expreward = pd.DataFrame()
+        _tx_fee = pd.DataFrame()
 
         sim.sim_DAA_asert(prices=prices, exprvs=exprvs, df_opt_w=df_opt_w)
         _blocktime['iter_{}'.format(iter)] = sim.block_times
@@ -812,12 +830,14 @@ def generate_simulation_data_asert(num_iter=3, price_shock=0, T=None,
         _winrate['iter_{}'.format(iter)] = sim.winning_rates
         _optwinrate['iter_{}'.format(iter)] = sim.optimal_winning_rates
         _expreward['iter_{}'.format(iter)] = sim.expected_rewards
+        _tx_fee['iter_{}'.format(iter)] = sim.tx_fees
 
         df_DAA_asert_blocktime = pd.concat([df_DAA_asert_blocktime, _blocktime], axis=1)
         df_DAA_asert_hashrate = pd.concat([df_DAA_asert_hashrate, _hashrate], axis=1)
         df_DAA_asert_winrate = pd.concat([df_DAA_asert_winrate, _winrate], axis=1)
         df_DAA_asert_optwinrate = pd.concat([df_DAA_asert_optwinrate, _optwinrate], axis=1)
         df_DAA_asert_expreward = pd.concat([df_DAA_asert_expreward, _expreward], axis=1)
+        df_DAA_asert_tx_fee = pd.concat([df_DAA_asert_tx_fee, _tx_fee], axis=1)
 
 
     df_DAA_asert_blocktime.to_csv(dir_sim+'tx_DAA_asert_blocktime_ps{}_{}obs_T={}'\
@@ -829,6 +849,8 @@ def generate_simulation_data_asert(num_iter=3, price_shock=0, T=None,
     df_DAA_asert_optwinrate.to_csv(dir_sim+'tx_DAA_asert_optwinrate_ps{}_{}obs_T={}'\
         .format(price_shock, num_iter, T)+'.csv')
     df_DAA_asert_expreward.to_csv(dir_sim+'tx_DAA_asert_expreward_ps{}_{}obs_T={}'\
+        .format(price_shock, num_iter, T)+'.csv')
+    df_DAA_asert_tx_fee.to_csv(dir_sim+'tx_DAA_asert_tx_fee_ps{}_{}obs_T={}'\
         .format(price_shock, num_iter, T)+'.csv')
 
     return None
