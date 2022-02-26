@@ -514,6 +514,7 @@ class simulation:
     def hash_supply(self, current_period):
         '''
         Compute hash supply in current period (EH)
+
         '''
         current_exp_reward = \
             (self.prices[current_period] * self.winning_rates[current_period]

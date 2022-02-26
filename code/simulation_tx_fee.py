@@ -525,7 +525,7 @@ class simulation:
         else:
             log_price_diff = np.log(price_diff)
 
-        log_tx_fee = -2.76 + 1.412*log_ave_blocktime + 0.651*np.log(self.prices[t]) + 0.104*log_price_diff
+        log_tx_fee = -2.74 + 1.385*log_ave_blocktime + 0.656*np.log(self.prices[t]) + 0.106*log_price_diff
         tx_fee = np.exp(log_tx_fee)
         self.tx_fees[t] = tx_fee
         current_exp_reward = \
