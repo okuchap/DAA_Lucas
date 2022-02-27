@@ -425,8 +425,7 @@ class simulation:
 
 
     def compute_price(self, current_period, current_time, epsilons,
-                      mu_min=-3.06512775e-05, mu_max=1.051762258597285e-05,
-                      hash_min=55/(1+np.exp(4.5)), hash_max=55):
+                      alpha=2.2033069895178425e-06, beta=-6.944444444444444e-05):
         '''
         Compute the price at the time when the (t+1)-th block is created:
         compute S(t+1) via geometric BM with variable drift rate
@@ -439,9 +438,7 @@ class simulation:
         t = current_period
 
         # compute drift
-        mu_diff = mu_max - mu_min
-        hash_diff = hash_max - hash_min
-        mu = mu_min + (mu_diff/hash_diff)*(self.hash_rates[t] - hash_min)
+        mu = alpha * self.hash_rates[t] + beta
 
         # update price
         self.prices[t+1] = \
