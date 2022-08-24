@@ -5,7 +5,7 @@ from hash import *
 
 
 class simulation:
-    def __init__(self, length=12096, mu=0, sigma=0.001117728,
+    def __init__(self, beta, length=12096, mu=0, sigma=0.001117728,
                  b_target=10, block_reward=12.5, hash_ubd=55,
                  hash_slope=3, hash_center=1.5, prev_data=pd.DataFrame(),
                  T_BCH=144, T_BTC=2016, init_price=5400,
@@ -47,6 +47,8 @@ class simulation:
 
             init_winning-rate: the inirial winning rate.
 
+            beta: the sensitivity of the drift
+
         Attributes
         ----------
             block_times
@@ -73,6 +75,7 @@ class simulation:
         self.hash_center = hash_center
         self.T_BCH = T_BCH
         self.T_BTC = T_BTC
+        self.beta = beta
 
         if prev_data.empty == True:
             self.prev_prices = np.ones(T_BCH) * init_price
@@ -424,8 +427,7 @@ class simulation:
         return None
 
 
-    def compute_price(self, current_period, current_time, epsilons,
-                      alpha=2.2033069895178425e-06, beta=-6.944444444444444e-05):
+    def compute_price(self, current_period, current_time, epsilons, initial_hash=31.52):
         '''
         Compute the price at the time when the (t+1)-th block is created:
         compute S(t+1) via geometric BM with variable drift rate
@@ -438,7 +440,7 @@ class simulation:
         t = current_period
 
         # compute drift
-        mu = alpha * self.hash_rates[t] + beta
+        mu = self.beta * (self.hash_rates[t] - initial_hash)
 
         # update price
         self.prices[t+1] = \
@@ -567,7 +569,7 @@ class simulation:
 
 
 # Functions
-def generate_simulation_data(num_iter=3, price_shock=0, T=None,
+def generate_simulation_data(beta, num_iter=3, price_shock=0, T=None,
                              opt_w=pd.DataFrame(), prev_data=pd.DataFrame(),
                              dir_sim='/Volumes/Data/research/BDA/simulation/'):
     '''
@@ -609,7 +611,7 @@ def generate_simulation_data(num_iter=3, price_shock=0, T=None,
         T_BTC = 2016
         T_BCH = 144
 
-    sim = simulation(prev_data=prev_data, T_BTC=T_BTC, T_BCH=T_BCH)
+    sim = simulation(prev_data=prev_data, T_BTC=T_BTC, T_BCH=T_BCH, beta=beta)
 
     for iter in range(num_iter):
         epsilons = df_epsilon.loc[:, 'iter_{}'.format(iter)]
@@ -661,36 +663,36 @@ def generate_simulation_data(num_iter=3, price_shock=0, T=None,
         df_DAA_2_expreward = pd.concat([df_DAA_2_expreward, _expreward], axis=1)
         df_DAA_2_price = pd.concat([df_DAA_2_price, _price], axis=1)
 
-    df_DAA_1_blocktime.to_csv(dir_sim+'hash-price_DAA-1_blocktime_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_1_hashrate.to_csv(dir_sim+'hash-price_DAA-1_hashrate_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_1_winrate.to_csv(dir_sim+'hash-price_DAA-1_winrate_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_1_optwinrate.to_csv(dir_sim+'hash-price_DAA-1_optwinrate_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_1_expreward.to_csv(dir_sim+'hash-price_DAA-1_expreward_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_1_price.to_csv(dir_sim+'hash-price_DAA-1_price_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
+    df_DAA_1_blocktime.to_csv(dir_sim+'hash-price_DAA-1_blocktime_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_1_hashrate.to_csv(dir_sim+'hash-price_DAA-1_hashrate_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_1_winrate.to_csv(dir_sim+'hash-price_DAA-1_winrate_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_1_optwinrate.to_csv(dir_sim+'hash-price_DAA-1_optwinrate_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_1_expreward.to_csv(dir_sim+'hash-price_DAA-1_expreward_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_1_price.to_csv(dir_sim+'hash-price_DAA-1_price_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
 
-    df_DAA_2_blocktime.to_csv(dir_sim+'hash-price_DAA-2_blocktime_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_2_hashrate.to_csv(dir_sim+'hash-price_DAA-2_hashrate_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_2_winrate.to_csv(dir_sim+'hash-price_DAA-2_winrate_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_2_optwinrate.to_csv(dir_sim+'hash-price_DAA-2_optwinrate_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_2_expreward.to_csv(dir_sim+'hash-price_DAA-2_expreward_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_2_price.to_csv(dir_sim+'hash-price_DAA-2_price_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
+    df_DAA_2_blocktime.to_csv(dir_sim+'hash-price_DAA-2_blocktime_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_2_hashrate.to_csv(dir_sim+'hash-price_DAA-2_hashrate_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_2_winrate.to_csv(dir_sim+'hash-price_DAA-2_winrate_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_2_optwinrate.to_csv(dir_sim+'hash-price_DAA-2_optwinrate_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_2_expreward.to_csv(dir_sim+'hash-price_DAA-2_expreward_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_2_price.to_csv(dir_sim+'hash-price_DAA-2_price_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
 
     return None
 
 
-def generate_simulation_data_DAA0(num_iter=3, price_shock=0,
+def generate_simulation_data_DAA0(beta, num_iter=3, price_shock=0,
                              opt_w=pd.DataFrame(), prev_data=pd.DataFrame(),
                              dir_sim='/Volumes/Data/research/BDA/simulation/'):
     '''
@@ -716,7 +718,7 @@ def generate_simulation_data_DAA0(num_iter=3, price_shock=0,
     df_DAA_0_expreward = pd.DataFrame()
     df_DAA_0_price = pd.DataFrame()
 
-    sim = simulation(prev_data=prev_data)
+    sim = simulation(prev_data=prev_data, beta=beta)
 
     for iter in range(num_iter):
         epsilons = df_epsilon.loc[:, 'iter_{}'.format(iter)]
@@ -745,23 +747,23 @@ def generate_simulation_data_DAA0(num_iter=3, price_shock=0,
         df_DAA_0_expreward = pd.concat([df_DAA_0_expreward, _expreward], axis=1)
         df_DAA_0_price = pd.concat([df_DAA_0_price, _price], axis=1)
 
-    df_DAA_0_blocktime.to_csv(dir_sim+'hash-price_DAA-0_blocktime_ps{}_{}obs'\
-        .format(price_shock, num_iter)+'.csv')
-    df_DAA_0_hashrate.to_csv(dir_sim+'hash-price_DAA-0_hashrate_ps{}_{}obs'\
-        .format(price_shock, num_iter)+'.csv')
-    df_DAA_0_winrate.to_csv(dir_sim+'hash-price_DAA-0_winrate_ps{}_{}obs'\
-        .format(price_shock, num_iter)+'.csv')
-    df_DAA_0_optwinrate.to_csv(dir_sim+'hash-price_DAA-0_optwinrate_ps{}_{}obs'\
-        .format(price_shock, num_iter)+'.csv')
-    df_DAA_0_expreward.to_csv(dir_sim+'hash-price_DAA-0_expreward_ps{}_{}obs'\
-        .format(price_shock, num_iter)+'.csv')
-    df_DAA_0_price.to_csv(dir_sim+'hash-price_DAA-0_price_ps{}_{}obs'\
-        .format(price_shock, num_iter)+'.csv')
+    df_DAA_0_blocktime.to_csv(dir_sim+'hash-price_DAA-0_blocktime_ps{}_{}obs_beta{}'\
+        .format(price_shock, num_iter, beta*(10**6))+'.csv')
+    df_DAA_0_hashrate.to_csv(dir_sim+'hash-price_DAA-0_hashrate_ps{}_{}obs_beta{}'\
+        .format(price_shock, num_iter, beta*(10**6))+'.csv')
+    df_DAA_0_winrate.to_csv(dir_sim+'hash-price_DAA-0_winrate_ps{}_{}obs_beta{}'\
+        .format(price_shock, num_iter, beta*(10**6))+'.csv')
+    df_DAA_0_optwinrate.to_csv(dir_sim+'hash-price_DAA-0_optwinrate_ps{}_{}obs_beta{}'\
+        .format(price_shock, num_iter, beta*(10**6))+'.csv')
+    df_DAA_0_expreward.to_csv(dir_sim+'hash-price_DAA-0_expreward_ps{}_{}obs_beta{}'\
+        .format(price_shock, num_iter, beta*(10**6))+'.csv')
+    df_DAA_0_price.to_csv(dir_sim+'hash-price_DAA-0_price_ps{}_{}obs_beta{}'\
+        .format(price_shock, num_iter, beta*(10**6))+'.csv')
 
     return None
 
 
-def generate_simulation_data_asert(num_iter=3, price_shock=0, T=None,
+def generate_simulation_data_asert(beta, num_iter=3, price_shock=0, T=None,
                                    opt_w=pd.DataFrame(), prev_data=pd.DataFrame(),
                                    dir_sim='/Volumes/Data/research/BDA/simulation/'):
     '''
@@ -785,7 +787,7 @@ def generate_simulation_data_asert(num_iter=3, price_shock=0, T=None,
     df_DAA_asert_expreward = pd.DataFrame()
     df_DAA_asert_price = pd.DataFrame()
 
-    sim = simulation(prev_data=prev_data)
+    sim = simulation(prev_data=prev_data, beta=beta)
 
     for iter in range(num_iter):
         epsilons = df_epsilon.loc[:, 'iter_{}'.format(iter)]
@@ -815,18 +817,18 @@ def generate_simulation_data_asert(num_iter=3, price_shock=0, T=None,
         df_DAA_asert_price = pd.concat([df_DAA_asert_price, _price], axis=1)
 
 
-    df_DAA_asert_blocktime.to_csv(dir_sim+'hash-price_DAA_asert_blocktime_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_asert_hashrate.to_csv(dir_sim+'hash-price_DAA_asert_hashrate_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_asert_winrate.to_csv(dir_sim+'hash-price_DAA_asert_winrate_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_asert_optwinrate.to_csv(dir_sim+'hash-price_DAA_asert_optwinrate_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_asert_expreward.to_csv(dir_sim+'hash-price_DAA_asert_expreward_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
-    df_DAA_asert_price.to_csv(dir_sim+'hash-price_DAA_asert_price_ps{}_{}obs_T={}'\
-        .format(price_shock, num_iter, T)+'.csv')
+    df_DAA_asert_blocktime.to_csv(dir_sim+'hash-price_DAA_asert_blocktime_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_asert_hashrate.to_csv(dir_sim+'hash-price_DAA_asert_hashrate_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_asert_winrate.to_csv(dir_sim+'hash-price_DAA_asert_winrate_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_asert_optwinrate.to_csv(dir_sim+'hash-price_DAA_asert_optwinrate_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_asert_expreward.to_csv(dir_sim+'hash-price_DAA_asert_expreward_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
+    df_DAA_asert_price.to_csv(dir_sim+'hash-price_DAA_asert_price_ps{}_{}obs_T={}_beta{}'\
+        .format(price_shock, num_iter, T, beta*(10**6))+'.csv')
 
     return None
 
