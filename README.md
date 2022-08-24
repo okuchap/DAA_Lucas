@@ -23,4 +23,13 @@ This repository contains the codes and notebooks used for the following paper:
     - Section 6.1, 6.2, 6.3
 
 * [Notebook for simulation about miners' profit](https://github.com/okuchap/DAA_Lucas/blob/master/notebook/miner_profit.ipynb)
-    - Section 6.4
+    - Section 6.5
+
+* [Notebook for ASERT](https://github.com/okuchap/DAA_Lucas/blob/master/notebook/simulation_asert.ipynb)
+    - Section 7
+
+* [Notebook for Robustness Check 1: Transaction fee adjustment](https://github.com/okuchap/DAA_Lucas/blob/master/notebook/simulation_tx_fee.ipynb)
+    - Section 8.1
+
+* [Notebook for Robustness Check 2: Price adjustment](https://github.com/okuchap/DAA_Lucas/blob/master/notebook/simulation_hash_price.ipynb)
+    - Section 8.2
